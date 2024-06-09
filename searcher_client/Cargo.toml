@@ -12,10 +12,10 @@ futures-util = "0.3"
 jito-protos = { path = "../protos" }
 log = "0.4.17"
 prost-types = "0.11.8"
-solana-client = { git = "https://github.com/jito-foundation/jito-solana.git", branch = "v1.16" }
-solana-metrics = { git = "https://github.com/jito-foundation/jito-solana.git", branch = "v1.16" }
-solana-perf = { git = "https://github.com/jito-foundation/jito-solana.git", branch = "v1.16" }
-solana-sdk = { git = "https://github.com/jito-foundation/jito-solana.git", branch = "v1.16" }
+solana-client = { git = "https://github.com/jito-foundation/jito-solana.git", branch = "v1.16-upstream-july-28-2023" }
+solana-metrics = { git = "https://github.com/jito-foundation/jito-solana.git", branch = "v1.16-upstream-july-28-2023" }
+solana-perf = { git = "https://github.com/jito-foundation/jito-solana.git", branch = "v1.16-upstream-july-28-2023" }
+solana-sdk = { git = "https://github.com/jito-foundation/jito-solana.git", branch = "v1.16-upstream-july-28-2023" }
 thiserror = "1.0.39"
 tokio = { version = "1.14.1", features = ["full"] }
 tonic = { version = "0.8.3", features = ["tls"] }
