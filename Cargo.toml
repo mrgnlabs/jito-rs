@@ -1,6 +1,5 @@
 [workspace]
 members = [
-    "examples/*",
     "protos",
     "searcher_client",
 ]
