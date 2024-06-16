@@ -112,11 +112,9 @@ where
 
     let result = send_bundle_no_wait(transactions, searcher_client).await?;
 
-    // grab uuid from block engine + wait for results
     let uuid = result.into_inner().uuid;
     info!("Bundle sent. UUID: {:?}", uuid);
 
-    info!("Waiting for 10 seconds to hear results...");
     let mut time_left = 10000;
     while let Ok(Some(Ok(results))) = timeout(
         Duration::from_millis(time_left),
@@ -184,6 +182,7 @@ where
             error.to_string(),
         )));
     }
+
     info!("Bundle landed successfully");
     for sig in bundle_signatures.iter() {
         info!("https://solscan.io/tx/{}", sig);
