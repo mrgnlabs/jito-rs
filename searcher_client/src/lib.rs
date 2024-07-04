@@ -16,7 +16,7 @@ use jito_protos::{
         searcher_service_client::SearcherServiceClient, SendBundleRequest, SendBundleResponse,
     },
 };
-use log::info;
+use log::{info, warn};
 use solana_client::nonblocking::rpc_client::RpcClient;
 use solana_sdk::{
     commitment_config::CommitmentConfig,
@@ -112,10 +112,12 @@ where
 
     let result = send_bundle_no_wait(transactions, searcher_client).await?;
 
+    // grab uuid from block engine + wait for results
     let uuid = result.into_inner().uuid;
     info!("Bundle sent. UUID: {:?}", uuid);
 
-    let mut time_left = 10000;
+    info!("Waiting for 5 seconds to hear results...");
+    let mut time_left = 5000;
     while let Ok(Some(Ok(results))) = timeout(
         Duration::from_millis(time_left),
         bundle_results_subscription.next(),
@@ -174,18 +176,24 @@ where
             rpc_client.get_signature_status_with_commitment(sig, CommitmentConfig::processed())
         })
         .collect();
-
     let results = futures_util::future::join_all(futs).await;
-
-    if let Some(error) = results.iter().find_map(|r| r.as_ref().err()) {
+    if !results.iter().all(|r| matches!(r, Ok(Some(Ok(()))))) {
+        warn!("Transactions in bundle did not land");
         return Err(Box::new(BundleRejectionError::InternalError(
-            error.to_string(),
+            "Searcher service did not provide bundle status in time".into(),
         )));
     }
-
     info!("Bundle landed successfully");
+    let url: String = rpc_client.url();
+    let cluster = if url.contains("testnet") {
+        "testnet"
+    } else if url.contains("devnet") {
+        "devnet"
+    } else {
+        "mainnet"
+    };
     for sig in bundle_signatures.iter() {
-        info!("https://solscan.io/tx/{}", sig);
+        info!("https://solscan.io/tx/{}?cluster={}", sig, cluster);
     }
     Ok(())
 }
