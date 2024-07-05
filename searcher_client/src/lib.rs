@@ -114,9 +114,7 @@ where
 
     // grab uuid from block engine + wait for results
     let uuid = result.into_inner().uuid;
-    info!("Bundle sent. UUID: {:?}", uuid);
 
-    info!("Waiting for 5 seconds to hear results...");
     let mut time_left = 5000;
     while let Ok(Some(Ok(results))) = timeout(
         Duration::from_millis(time_left),
@@ -178,7 +176,6 @@ where
         .collect();
     let results = futures_util::future::join_all(futs).await;
     if !results.iter().all(|r| matches!(r, Ok(Some(Ok(()))))) {
-        warn!("Transactions in bundle did not land");
         return Err(Box::new(BundleRejectionError::InternalError(
             "Searcher service did not provide bundle status in time".into(),
         )));
