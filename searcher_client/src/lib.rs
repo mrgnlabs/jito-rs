@@ -99,6 +99,7 @@ pub async fn send_bundle_with_confirmation<T>(
     rpc_client: &RpcClient,
     searcher_client: &mut SearcherServiceClient<T>,
     bundle_results_subscription: &mut Streaming<BundleResult>,
+    mut time_to_success: u64,
 ) -> Result<(), Box<dyn std::error::Error>>
 where
     T: tonic::client::GrpcService<tonic::body::BoxBody> + Send + 'static + Clone,
@@ -115,9 +116,8 @@ where
     // grab uuid from block engine + wait for results
     let uuid = result.into_inner().uuid;
 
-    let mut time_left = 5000;
     while let Ok(Some(Ok(results))) = timeout(
-        Duration::from_millis(time_left),
+        Duration::from_millis(time_to_success),
         bundle_results_subscription.next(),
     )
     .await
@@ -165,7 +165,7 @@ where
             }
             _ => {}
         }
-        time_left -= instant.elapsed().as_millis() as u64;
+        time_to_success -= instant.elapsed().as_millis() as u64;
     }
 
     let futs: Vec<_> = bundle_signatures
